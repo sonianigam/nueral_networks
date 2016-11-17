@@ -2,7 +2,6 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-
 import tensorflow as tf
 import tflearn
 from tflearn.data_utils import to_categorical
@@ -16,11 +15,36 @@ def main():
     """
     csv_file_name = ''
     do_linear = False
+
     if len(sys.argv) == 3:
         csv_file_name = sys.argv[1]
-        do_linear = bool(sys.argv[2])
+        do_linear = bool(int(sys.argv[2]))
 
-    # YOUR CODE HERE
+    data = open(csv_file_name)
+
+    #ignore title
+    first_line = data.readline()
+
+    #read the remaining data within the file
+    body = data.readlines()
+    length = len(body)
+    position_array = np.zeros((length, 2))
+    class_array = np.zeros((length, 1))
+
+    index = 0
+    for line in body:
+        values = line.strip().split(',')
+        position_array[index][0] = values[0]
+        position_array[index][1] = values[1]
+        class_array[index] = values[2]
+        index += 1
+
+    if do_linear == False:
+        #plot_spiral(position_array, class_array, "spiral.png")
+        linear_classifier(position_array, class_array, 4)
+    else:
+        non_linear_classifier(position_array, class_array, 4)
+
 
 
 def linear_classifier(position_array, class_array, n_classes):
@@ -91,7 +115,7 @@ def plot_spiral_and_predicted_class(position_array, class_array, model, output_f
     plt.ylim(yy.min(), yy.max())
 
     plt.title(title)
-    fig.savefig(file_name)
+    fig.savefig(output_file_name)
 
 
 def plot_spiral(position_array, class_array, output_file_name):
