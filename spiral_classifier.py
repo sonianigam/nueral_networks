@@ -41,7 +41,9 @@ def main():
 
     if do_linear == False:
         #plot_spiral(position_array, class_array, "spiral.png")
-        linear_classifier(position_array, class_array, 4)
+        linear_position_array, linear_class_array, linear_model = linear_classifier(position_array, class_array, 4)
+        plot_spiral_and_predicted_class(linear_position_array, linear_class_array, linear_model, "linear.png", "Linear Classification Results")
+
     else:
         non_linear_classifier(position_array, class_array, 4)
 
@@ -65,7 +67,35 @@ def linear_classifier(position_array, class_array, n_classes):
     # linear classifier
     with tf.Graph().as_default():
         # YOUR CODE FOR PROBLEM 6A GOES HERE
-        pass
+            # Build neural network
+        net = tflearn.input_data(shape=[None, 2])
+        # 'None' always has to be the first parameter in shape because it tells
+        # tensor flow that the number of data points we have can be variable
+        # and 2 for 2 input nodes (x and y coordinates)
+
+        net = tflearn.fully_connected(net, n_classes, activation='softmax') # layer with 4 nodes and softmax
+        #net = tflearn.fully_connected(net, 1, activation='softmax') # 1 output notes
+        net = tflearn.regression(net, loss='categorical_crossentropy') #regression with categorical_crossentropy
+
+        # Define model
+        model = tflearn.DNN(net)
+        # Start training (apply gradient descent algorithm)
+        new_class_array = np.zeros((len(class_array), 4))
+        index = 0
+        for x in class_array:
+            if x == 0:
+                new_class_array[index] = [1,0,0,0]
+            elif x == 1:
+                new_class_array[index] = [0,1,0,0]
+            elif x == 2:
+                 new_class_array[index]= [0,0,1,0]
+            elif x == 3:
+                new_class_array[index] = [0,0,0,1]
+            index +=1 
+
+
+        model.fit(position_array, new_class_array,batch_size=10, show_metric=True, snapshot_step=1)
+        return position_array, new_class_array, model
 
 
 def non_linear_classifier(position_array, class_array, n_classes):
@@ -101,8 +131,8 @@ def plot_spiral_and_predicted_class(position_array, class_array, model, output_f
     :param title: title for the plot
     """
     h = 0.02
-    x_min, x_max = position_array[:, 0].min() - 1, positions[:, 0].max() + 1
-    y_min, y_max = position_array[:, 1].min() - 1, positions[:, 1].max() + 1
+    x_min, x_max = position_array[:, 0].min() - 1, position_array[:, 0].max() + 1
+    y_min, y_max = position_array[:, 1].min() - 1, position_array[:, 1].max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                          np.arange(y_min, y_max, h))
     z = np.argmax(model.predict(np.c_[xx.ravel(), yy.ravel()]), axis=1)
