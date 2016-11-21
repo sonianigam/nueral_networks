@@ -124,7 +124,7 @@ def non_linear_classifier(position_array, class_array, n_classes):
         # and 2 for 2 input nodes (x and y coordinates)
         #sgd = tflearn.optimizers.SGD(learning_rate=2.0, lr_decay=0.5, decay_step=100)
 
-        net = tflearn.fully_connected(net, 40000, activation='relu') # 20,0000 nodes
+        net = tflearn.fully_connected(net, 20000, activation='relu') # 20,0000 nodes
         net = tflearn.fully_connected(net, n_classes, activation='softmax') # layer with 4 nodes and softmax
         net = tflearn.regression(net, loss='categorical_crossentropy') #regression with categorical_crossentropy
 
