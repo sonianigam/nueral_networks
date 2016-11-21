@@ -45,7 +45,8 @@ def main():
         plot_spiral_and_predicted_class(linear_position_array, linear_class_array, linear_model, "linear.png", "Linear Classification Results")
 
     else:
-        non_linear_classifier(position_array, class_array, 4)
+        nonlinear_position_array, nonlinear_class_array, nonlinear_model = non_linear_classifier(position_array, class_array, 4)
+        plot_spiral_and_predicted_class(nonlinear_position_array, nonlinear_class_array, nonlinear_model, "nonlinear.png", "Nonlinear Classification Results")
 
 
 
@@ -74,14 +75,14 @@ def linear_classifier(position_array, class_array, n_classes):
         # and 2 for 2 input nodes (x and y coordinates)
 
         net = tflearn.fully_connected(net, n_classes, activation='softmax') # layer with 4 nodes and softmax
-        #net = tflearn.fully_connected(net, 1, activation='softmax') # 1 output notes
         net = tflearn.regression(net, loss='categorical_crossentropy') #regression with categorical_crossentropy
 
         # Define model
         model = tflearn.DNN(net)
-        # Start training (apply gradient descent algorithm)
         new_class_array = np.zeros((len(class_array), 4))
         index = 0
+
+        #change to be 4 dimensional
         for x in class_array:
             if x == 0:
                 new_class_array[index] = [1,0,0,0]
@@ -93,8 +94,8 @@ def linear_classifier(position_array, class_array, n_classes):
                 new_class_array[index] = [0,0,0,1]
             index +=1 
 
-
-        model.fit(position_array, new_class_array,batch_size=10, show_metric=True, snapshot_step=1)
+        # Start training (apply gradient descent algorithm)
+        model.fit(position_array, new_class_array, n_epoch=10, batch_size=10, show_metric=True, snapshot_step=1)
         return position_array, new_class_array, model
 
 
@@ -115,8 +116,38 @@ def non_linear_classifier(position_array, class_array, n_classes):
     :param n_classes: an integer that is the number of classes your data has
     """
     with tf.Graph().as_default():
-        # YOUR CODE FOR PROBLEM 6C GOES HERE:
-        pass
+        # YOUR CODE FOR PROBLEM 6C GOES HERE
+            # Build neural network
+        net = tflearn.input_data(shape=[None, 2])
+        # 'None' always has to be the first parameter in shape because it tells
+        # tensor flow that the number of data points we have can be variable
+        # and 2 for 2 input nodes (x and y coordinates)
+        #sgd = tflearn.optimizers.SGD(learning_rate=2.0, lr_decay=0.5, decay_step=100)
+
+        net = tflearn.fully_connected(net, 40000, activation='relu') # 20,0000 nodes
+        net = tflearn.fully_connected(net, n_classes, activation='softmax') # layer with 4 nodes and softmax
+        net = tflearn.regression(net, loss='categorical_crossentropy') #regression with categorical_crossentropy
+
+        # Define model
+        model = tflearn.DNN(net)
+        new_class_array = np.zeros((len(class_array), 4))
+        index = 0
+
+        #change to be four dimensional
+        for x in class_array:
+            if x == 0:
+                new_class_array[index] = [1,0,0,0]
+            elif x == 1:
+                new_class_array[index] = [0,1,0,0]
+            elif x == 2:
+                 new_class_array[index]= [0,0,1,0]
+            elif x == 3:
+                new_class_array[index] = [0,0,0,1]
+            index +=1 
+
+        # Start training (apply gradient descent algorithm)
+        model.fit(position_array, new_class_array, n_epoch=10, batch_size=10, show_metric=True, snapshot_step=1)
+        return position_array, new_class_array, model
 
 
 def plot_spiral_and_predicted_class(position_array, class_array, model, output_file_name, title):
